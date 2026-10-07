@@ -12,24 +12,16 @@ from the Phase 1 outputs. Nothing is refitted on the faulty turbines.
 import numpy as np
 import pandas as pd
 
-from pca_monitoring import load_model, project
+from pca_monitoring import PCAModel, load_model, project
 from phase1_healthy_model import FINAL_MODEL_PREFIX, alarm_flags, create_control_charts
 from pretreatment import FAULTY_TURBINES, HEALTHY_TURBINE, OUTPUT_DIR, load_pca_data
+
+MONITORING_STATISTICS_FILE = OUTPUT_DIR / "phase2_monitoring_statistics.csv"
 
 
 def main() -> None:
     pca_x, _ = load_pca_data()
-
-    # Load the final healthy model and its limits saved by Phase 1.
-    model = load_model(FINAL_MODEL_PREFIX)
-    saved_limits = pd.read_csv(f"{FINAL_MODEL_PREFIX}_limits.csv").iloc[0]
-    n_components = int(saved_limits["n_components"])
-    limits = {
-        "t2_f": saved_limits["t2_limit_f"],
-        "q_jm": saved_limits["q_limit_jackson_mudholkar"],
-        "t2_3sd": saved_limits["t2_limit_3sd"],
-        "q_3sd": saved_limits["q_limit_3sd"],
-    }
+    model, n_components, limits = load_final_model()
 
     print("\n========================================================")
     print(
@@ -90,7 +82,7 @@ def main() -> None:
         )
 
     pd.concat(statistics, ignore_index=True).to_csv(
-        OUTPUT_DIR / "phase2_monitoring_statistics.csv", index=False
+        MONITORING_STATISTICS_FILE, index=False
     )
     summary = pd.DataFrame(summary)
     summary.to_csv(OUTPUT_DIR / "phase2_alarm_summary.csv", index=False)
@@ -120,6 +112,21 @@ def main() -> None:
                 f"  first alarm: observation {row.first_alarm_observation}, "
                 f"last alarm: observation {row.last_alarm_observation}"
             )
+
+
+def load_final_model() -> tuple[PCAModel, int, dict[str, float]]:
+    """Load the final healthy model, its number of components and its limits from Phase 1."""
+    model = load_model(FINAL_MODEL_PREFIX)
+    saved_limits = pd.read_csv(
+        f"{FINAL_MODEL_PREFIX}_limits.csv", float_precision="round_trip"
+    ).iloc[0]
+    limits = {
+        "t2_f": saved_limits["t2_limit_f"],
+        "q_jm": saved_limits["q_limit_jackson_mudholkar"],
+        "t2_3sd": saved_limits["t2_limit_3sd"],
+        "q_3sd": saved_limits["q_limit_3sd"],
+    }
+    return model, int(saved_limits["n_components"]), limits
 
 
 if __name__ == "__main__":

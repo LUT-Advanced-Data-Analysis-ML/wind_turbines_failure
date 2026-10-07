@@ -1,0 +1,25 @@
+turbine,period,variable,healthy_value,observations,observations_different_from_healthy,unique_values,minimum,maximum
+No.14WT,A: fault period (before variable 13 transition),12,1750,357,357,1,50.0,50.0
+No.14WT,A: fault period (before variable 13 transition),15,849,357,0,1,849.0,849.0
+No.14WT,A: transition observation,12,1750,1,1,1,0.0,0.0
+No.14WT,A: transition observation,15,849,1,1,1,0.0,0.0
+No.14WT,A: after transition,12,1750,328,0,1,1750.0,1750.0
+No.14WT,A: after transition,15,849,328,0,1,849.0,849.0
+No.14WT,A: alarms after transition,12,1750,19,0,1,1750.0,1750.0
+No.14WT,A: alarms after transition,15,849,19,0,1,849.0,849.0
+No.14WT,B: alarm episodes,12,1750,428,358,3,0.0,1750.0
+No.14WT,B: alarm episodes,15,849,428,1,2,0.0,849.0
+No.14WT,B: outside alarm episodes,12,1750,258,0,1,1750.0,1750.0
+No.14WT,B: outside alarm episodes,15,849,258,0,1,849.0,849.0
+No.39WT,A: fault period (before variable 13 transition),12,1750,469,469,1,50.0,50.0
+No.39WT,A: fault period (before variable 13 transition),15,849,469,469,171,9.299887657,10.999887470000001
+No.39WT,A: transition observation,12,1750,1,1,1,0.0,0.0
+No.39WT,A: transition observation,15,849,1,1,1,0.241120553,0.241120553
+No.39WT,A: after transition,12,1750,935,0,1,1750.0,1750.0
+No.39WT,A: after transition,15,849,935,0,1,849.0,849.0
+No.39WT,A: alarms after transition,12,1750,38,0,1,1750.0,1750.0
+No.39WT,A: alarms after transition,15,849,38,0,1,849.0,849.0
+No.39WT,B: alarm episodes,12,1750,560,470,3,0.0,1750.0
+No.39WT,B: alarm episodes,15,849,560,470,173,0.241120553,849.0
+No.39WT,B: outside alarm episodes,12,1750,845,0,1,1750.0,1750.0
+No.39WT,B: outside alarm episodes,15,849,845,0,1,849.0,849.0
