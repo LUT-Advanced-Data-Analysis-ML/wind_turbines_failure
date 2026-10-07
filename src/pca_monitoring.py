@@ -5,11 +5,13 @@ autoscaling and economy-SVD PCA of a reference X, projection of new
 observations, Hotelling's T2 and Q (SPEx) statistics, their control limits,
 and the variable contributions used for sensor diagnostics.
 
-Note: No data are loaded or fitted here. The phase scripts decide which
-observations a model is fitted on and which observations are projected.
+Note: No turbine data are loaded or fitted here. The phase scripts decide
+which observations a model is fitted on and which observations are projected.
+A fitted model can be saved to CSV files and loaded again by later phases.
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -64,6 +66,48 @@ def fit_model(x: pd.DataFrame) -> PCAModel:
         loadings=vt.T,
         eigenvalues=singular_values**2 / (len(x) - 1),
         n_observations=len(x),
+    )
+
+
+def save_model(model: PCAModel, path_prefix: Path) -> None:
+    """
+    Save the autoscaling parameters, loadings and eigenvalues as CSV files.
+
+    Writes <prefix>_parameters.csv (one row per variable: mean, standard
+    deviation and the loadings of every component) and
+    <prefix>_eigenvalues.csv (one row per component).
+    """
+    component_names = [f"PC{i}" for i in range(1, len(model.variables) + 1)]
+    parameters = pd.DataFrame(
+        model.loadings, index=model.variables, columns=component_names
+    )
+    parameters.insert(0, "std", model.std.to_numpy())
+    parameters.insert(0, "mean", model.mean.to_numpy())
+    parameters.index.name = "variable"
+    parameters.to_csv(f"{path_prefix}_parameters.csv")
+
+    pd.DataFrame(
+        {
+            "component": component_names,
+            "eigenvalue": model.eigenvalues,
+            "n_observations": model.n_observations,
+        }
+    ).to_csv(f"{path_prefix}_eigenvalues.csv", index=False)
+
+
+def load_model(path_prefix: Path) -> PCAModel:
+    """Load a model written by save_model. Values are parsed without rounding."""
+    parameters = pd.read_csv(
+        f"{path_prefix}_parameters.csv", index_col="variable", float_precision="round_trip"
+    )
+    eigenvalues = pd.read_csv(f"{path_prefix}_eigenvalues.csv", float_precision="round_trip")
+    return PCAModel(
+        variables=parameters.index.tolist(),
+        mean=parameters["mean"],
+        std=parameters["std"],
+        loadings=parameters.drop(columns=["mean", "std"]).to_numpy(),
+        eigenvalues=eigenvalues["eigenvalue"].to_numpy(),
+        n_observations=int(eigenvalues["n_observations"].iloc[0]),
     )
 
 
