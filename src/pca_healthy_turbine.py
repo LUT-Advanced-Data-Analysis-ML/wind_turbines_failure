@@ -8,20 +8,23 @@ Note: Selected turbines are based on the ininitial inspection of the raw data. T
         and its statistics are used to autoscale the other turbines for later projection.
 """
 
-from pathlib import Path
 import matplotlib
 import numpy as np
 import pandas as pd
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# Define constants for file paths and turbine selection. The healthy turbine is used to fit the PCA model.
-PROJECT_DIR = Path(__file__).resolve().parents[1]
-DATA_FILE = PROJECT_DIR / "resources" / "wind_turbine_fault_diagnosis_data.xlsx"
-OUTPUT_DIR = PROJECT_DIR / "outputs"
-TURBINES = ["No.2WT", "No.14WT", "No.39WT"]
-COMMON_VARIABLES = list(range(1, 28))
-HEALTHY_TURBINE = "No.2WT"
+# File paths and turbine selection are shared with the modelling scripts.
+# The healthy turbine is used to fit the PCA model.
+from pretreatment import (
+    HEALTHY_TURBINE,
+    OUTPUT_DIR,
+    TURBINES,
+    interpolate_missing_value,
+    load_aligned_data,
+    remove_healthy_constant_variables,
+)
+
 # These two No.14WT variables illustrate the audit in one focused plot.
 PLOTTED_EXTREME_VALUE_VARIABLES = [5, 11]
 LABEL_OFFSETS = {
@@ -35,47 +38,16 @@ LABEL_OFFSETS = {
 def main() -> None:
     # Load the three structurally compatible turbines and retain variables
     # 1-27. This removes variable 28 from the healthy turbine.
-    workbook = pd.read_excel(DATA_FILE, sheet_name=None, header=0)
-    aligned = {
-        name: workbook[name].loc[:, COMMON_VARIABLES].copy()
-        for name in TURBINES
-    }
+    aligned = load_aligned_data()
     missing_values_before = {
         name: int(data.isna().sum().sum())
         for name, data in aligned.items()
     }
 
-    # Preserve the time-series row and estimate the single missing value from
-    # its adjacent observations using linear interpolation in observation order.
-    faulty_x = aligned["No.14WT"]
-    missing_row, missing_column = np.argwhere(faulty_x.isna().to_numpy())[0]
-    missing_variable = faulty_x.columns[missing_column]
-    original_row_count = len(faulty_x)
-    expected_value = (
-        faulty_x.iloc[missing_row - 1, missing_column]
-        + faulty_x.iloc[missing_row + 1, missing_column]
-    ) / 2
-
-    aligned["No.14WT"] = aligned["No.14WT"].interpolate(method="linear", axis=0)
-    interpolated_value = aligned["No.14WT"].iloc[missing_row, missing_column]
-
-    # Verify that interpolation preserves the sequence and fills the known gap.
-    assert len(aligned["No.14WT"]) == original_row_count
-    assert not aligned["No.14WT"].isna().any().any()
-    assert np.isclose(interpolated_value, expected_value)
-
-    # Variables 12 and 15 are constant in the healthy turbine. They cannot be
-    # autoscaled and contain no variation for the healthy PCA model.
-    healthy_aligned = aligned[HEALTHY_TURBINE]
-    healthy_std = healthy_aligned.std(ddof=1)
-    constant_variables = healthy_std.index[healthy_std == 0].tolist()
-    pca_variables = [variable for variable in COMMON_VARIABLES if variable not in constant_variables]
-    pca_x = {name: data.loc[:, pca_variables] for name, data in aligned.items()}
-
-    # All turbines must contain the same variables in the same order before
-    # healthy-model fitting or any later projection.
-    expected_columns = pd.Index(pca_variables)
-    assert all(data.columns.equals(expected_columns) for data in pca_x.values())
+    # Preserve the time-series row and linearly interpolate the single
+    # missing No.14WT value, then remove the healthy constant variables.
+    interpolation = interpolate_missing_value(aligned)
+    pca_x, pca_variables, constant_variables = remove_healthy_constant_variables(aligned)
 
     # Screen every retained variable for unusual values. The IQR limits are
     # descriptive diagnostics, not rules for changing measured observations.
@@ -124,9 +96,10 @@ def main() -> None:
         print(f"{name}: {data.shape[0]} observations x {data.shape[1]} variables")
     print("---")
     print(
-        f"No.14WT variable {missing_variable}, observation {missing_row + 1}: "
-        f"linear interpolation = {interpolated_value:.0f}; "
-        f"rows preserved = {original_row_count}"
+        f"No.14WT variable {interpolation['variable']}, "
+        f"observation {interpolation['observation']}: "
+        f"linear interpolation = {interpolation['value']:.0f}; "
+        f"rows preserved = {interpolation['rows']}"
     )
     print("---")
     print(f"Excluded zero-variance healthy variables: {constant_variables}")
