@@ -2,9 +2,10 @@
 
 Follows steps 11-14 of the PCA-based fault detection workflow (report 2,
 Figure 5): select the out-of-control observations and the fault period of
-each faulty turbine, compute T2 and SPEx contributions, draw time-coloured
-biplots against the healthy turbine, check the alarm proportions, and rank
-the variables that are most representative of the faults.
+each faulty turbine, compute T2 and SPEx contributions of the out-of-control
+observations, draw time-coloured biplots against the healthy turbine, check
+the alarm proportions, and rank the variables that are most representative
+of the faults.
 
 Note: The final healthy model is loaded from the Phase 1 outputs. The faulty
 turbines are projected onto it again because contributions need the scaled
@@ -17,6 +18,7 @@ import numpy as np
 import pandas as pd
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm, SymLogNorm
 
 from pca_monitoring import (
     PCAModel,
@@ -45,8 +47,6 @@ ALARM_FREE_GAP = 30
 # Variables 12 and 15 are constant in the healthy turbine and are not part
 # of the PCA model; departures from their healthy values are checked here.
 HEALTHY_CONSTANT_VARIABLES = [12, 15]
-# Contributions are divided by this percentile of the healthy contributions.
-HEALTHY_CONTRIBUTION_PERCENTILE = 99
 TOP_VARIABLES = 5
 BIPLOT_PAIRS = [(0, 1), (0, 2), (1, 2)]
 
@@ -90,7 +90,6 @@ def main() -> None:
             "A: fault period (before variable 13 transition)": observations < transition,
             "A: transition observation": observations == transition,
             "A: after transition": observations > transition,
-            "A: alarms after transition": (observations > transition) & alarms[name],
             "B: alarm episodes": in_episode,
             "B: outside alarm episodes": ~in_episode,
         }
@@ -133,44 +132,29 @@ def main() -> None:
         )
 
     # ============================ Steps 12a-b: T2 and SPEx contributions ===========================
-    # Contributions are divided by the healthy 99th percentile of each
-    # variable's absolute contribution. A normalised value above 1 means the
-    # variable contributes more than it does in 99% of healthy observations.
-    healthy_t2 = t2_contributions(model, projections[HEALTHY_TURBINE])
-    healthy_spe = spe_contributions(projections[HEALTHY_TURBINE])
-    reference = {
-        "T2": np.percentile(np.abs(healthy_t2), HEALTHY_CONTRIBUTION_PERCENTILE, axis=0),
-        "SPEx": np.percentile(healthy_spe, HEALTHY_CONTRIBUTION_PERCENTILE, axis=0),
-    }
-
+    # Each statistic is explained by its own out-of-control observations: T2
+    # contributions are averaged over the T2 alarms and SPEx contributions
+    # over the Q alarms. The scaled values already use the healthy statistics,
+    # so the contributions are compared without further normalisation.
     contribution_rows = []
     for name in FAULTY_TURBINES:
         projection = projections[name]
         contributions = {
-            "T2": t2_contributions(model, projection),
-            "SPEx": spe_contributions(projection),
+            "T2": (t2_contributions(model, projection), projection.t2 > limits["t2_f"]),
+            "SPEx": (spe_contributions(projection), projection.q > limits["q_jm"]),
         }
-        for period, mask in periods[name].items():
-            if not mask.any():
-                continue
-            for statistic, values in contributions.items():
-                normalised = values[mask] / reference[statistic]
-                for index, variable in enumerate(variables):
-                    contribution_rows.append(
-                        {
-                            "turbine": name,
-                            "period": period,
-                            "observations": int(mask.sum()),
-                            "statistic": statistic,
-                            "variable": variable,
-                            "mean_contribution": values[mask, index].mean(),
-                            "mean_normalised_contribution": normalised[:, index].mean(),
-                            "percent_above_healthy_percentile": 100 * np.mean(
-                                np.abs(normalised[:, index]) > 1
-                            ),
-                            "mean_signed_residual": projection.residuals[mask, index].mean(),
-                        }
-                    )
+        for statistic, (values, statistic_alarms) in contributions.items():
+            for index, variable in enumerate(variables):
+                contribution_rows.append(
+                    {
+                        "turbine": name,
+                        "statistic": statistic,
+                        "alarm_observations": int(statistic_alarms.sum()),
+                        "variable": variable,
+                        "mean_contribution": values[statistic_alarms, index].mean(),
+                    }
+                )
+        create_contribution_heatmap(contributions, name, variables)
     contributions_table = pd.DataFrame(contribution_rows)
     contributions_table.to_csv(OUTPUT_DIR / "phase3_contributions.csv", index=False)
     for name in FAULTY_TURBINES:
@@ -214,8 +198,6 @@ def main() -> None:
     print("\n========================================================")
     print("\nExtra check: variables 12 and 15 (constant in No.2WT)")
     for row in constant_check[~constant_check["period"].str.startswith("B:")].itertuples():
-        if row.period == "A: alarms after transition":
-            continue
         print(
             f"{row.turbine}, {row.period}, variable {row.variable}: "
             f"{row.observations_different_from_healthy} / {row.observations} "
@@ -236,7 +218,7 @@ def main() -> None:
             ("T2 or Q", "3SD"): alarm_flags(projection, limits, three_sigma=True),
         }
         for period, mask in periods[name].items():
-            if period == "A: alarms after transition" or not mask.any():
+            if not mask.any():
                 continue
             for (statistic, limit_type), flag in flags.items():
                 proportion_rows.append(
@@ -270,15 +252,14 @@ def main() -> None:
     )
 
     # ============================ Step 14: fault-sensitive sensors ===========================
-    # Variables are ranked by the magnitude of their mean normalised
-    # contribution in the fault period of method A; T2 contributions can be
-    # negative, so the sign only gives the direction. A variable is reported
-    # when it is among the top variables for both statistics in both turbines.
-    fault_period = "A: fault period (before variable 13 transition)"
-    ranking = contributions_table[contributions_table["period"] == fault_period].copy()
-    ranking["absolute_mean_normalised_contribution"] = ranking["mean_normalised_contribution"].abs()
+    # Variables are ranked by the magnitude of their mean contribution over
+    # the out-of-control observations; T2 contributions can be negative, so
+    # the sign only gives the direction. A variable is reported when it is
+    # among the top variables for both statistics in both turbines.
+    ranking = contributions_table.copy()
+    ranking["absolute_mean_contribution"] = ranking["mean_contribution"].abs()
     ranking["rank"] = ranking.groupby(["turbine", "statistic"])[
-        "absolute_mean_normalised_contribution"
+        "absolute_mean_contribution"
     ].rank(ascending=False, method="min").astype(int)
     ranking = ranking.sort_values(["turbine", "statistic", "rank"])
     ranking.to_csv(OUTPUT_DIR / "phase3_sensor_ranking.csv", index=False)
@@ -288,14 +269,12 @@ def main() -> None:
     combinations = len(FAULTY_TURBINES) * 2
 
     print("\n========================================================")
-    print(f"\nStep 14: top {TOP_VARIABLES} variables by mean normalised contribution (fault period, method A)")
+    print(f"\nStep 14: top {TOP_VARIABLES} variables by mean contribution over the out-of-control observations")
     for (name, statistic), group in top.groupby(["turbine", "statistic"], sort=False):
         values = ", ".join(
-            f"{row.variable} ({row.mean_normalised_contribution:.3g}; "
-            f"{row.percent_above_healthy_percentile:.0f}% obs above healthy)"
-            for row in group.itertuples()
+            f"{row.variable} ({row.mean_contribution:.3g})" for row in group.itertuples()
         )
-        print(f"{name} {statistic}: {values}")
+        print(f"{name} {statistic} ({group['alarm_observations'].iloc[0]} alarms): {values}")
     print(
         f"\nFault-sensitive variables (top {TOP_VARIABLES} for T2 and SPEx in both turbines): "
         f"{sorted(appearances[appearances == combinations].index.tolist())}"
@@ -340,57 +319,90 @@ def create_contribution_plot(
     contributions_table: pd.DataFrame, name: str, variables: list[int]
 ) -> None:
     """
-    Mean contributions in the fault period and at the alarms after it.
+    Mean T2 and SPEx contributions over each statistic's out-of-control observations.
 
-    Rows show raw and normalised T2 and SPEx contributions and the signed
-    SPEx residuals. A symmetric logarithmic axis keeps both the very large
-    and the small contributions visible.
+    A symmetric logarithmic axis keeps the very large, the small and the
+    negative T2 contributions visible.
     """
-    columns = [
-        "A: fault period (before variable 13 transition)",
-        "A: alarms after transition",
-    ]
-    rows = [
-        ("T2", "mean_contribution", "T2 contribution"),
-        ("T2", "mean_normalised_contribution", "T2 contribution /\nhealthy 99th pct"),
-        ("SPEx", "mean_contribution", "SPEx contribution"),
-        ("SPEx", "mean_normalised_contribution", "SPEx contribution /\nhealthy 99th pct"),
-        ("SPEx", "mean_signed_residual", "Signed residual e"),
-    ]
+    statistics = [("T2", "T2 contribution", "T2"), ("SPEx", "SPEx contribution", "Q")]
     positions = np.arange(len(variables))
     fig, axes = plt.subplots(
-        len(rows), len(columns), figsize=(16, 17), sharex=True, constrained_layout=True
+        len(statistics), 1, figsize=(14, 9), sharex=True, constrained_layout=True
     )
-    for column, period in enumerate(columns):
-        period_table = contributions_table[
-            (contributions_table["turbine"] == name) & (contributions_table["period"] == period)
-        ]
-        n_observations = int(period_table["observations"].iloc[0]) if len(period_table) else 0
-        for row, (statistic, value_column, label) in enumerate(rows):
-            axis = axes[row, column]
-            values = (
-                period_table[period_table["statistic"] == statistic]
-                .set_index("variable")
-                .reindex(variables)[value_column]
-                .to_numpy()
-            )
-            colors = ["tab:orange" if value < 0 else "tab:blue" for value in values]
-            axis.bar(positions, values, color=colors, edgecolor="black", linewidth=0.3)
-            axis.axhline(0, color="0.4", linewidth=0.8)
-            if value_column == "mean_normalised_contribution":
-                axis.axhline(1, color="tab:red", linestyle="--", linewidth=1,
-                             label="Healthy 99th percentile")
-                axis.legend(fontsize=8, loc="upper right")
-            axis.set_yscale("symlog", linthresh=1)
-            axis.set_ylabel(label)
-            axis.grid(axis="y", alpha=0.25)
-            if row == 0:
-                axis.set_title(f"{period} ({n_observations} observations)")
-        axes[-1, column].set_xticks(positions, labels=variables, rotation=90, fontsize=8)
-        axes[-1, column].set_xlabel("Variable")
+    for axis, (statistic, label, limit_name) in zip(axes, statistics):
+        table = (
+            contributions_table[
+                (contributions_table["turbine"] == name)
+                & (contributions_table["statistic"] == statistic)
+            ]
+            .set_index("variable")
+            .reindex(variables)
+        )
+        values = table["mean_contribution"].to_numpy()
+        colors = ["tab:orange" if value < 0 else "tab:blue" for value in values]
+        axis.bar(positions, values, color=colors, edgecolor="black", linewidth=0.3)
+        axis.axhline(0, color="0.4", linewidth=0.8)
+        axis.set_yscale("symlog", linthresh=1)
+        axis.set_ylabel(f"Mean {label}")
+        axis.grid(axis="y", alpha=0.25)
+        axis.set_title(
+            f"{statistic}: mean over the {table['alarm_observations'].iloc[0]} "
+            f"observations above the {limit_name} limit"
+        )
+    axes[-1].set_xticks(positions, labels=variables, rotation=90, fontsize=8)
+    axes[-1].set_xlabel("Variable")
 
-    fig.suptitle(f"{name}: mean variable contributions (symmetric log scale)")
+    fig.suptitle(f"{name}: mean variable contributions of the out-of-control observations (symmetric log scale)")
     fig.savefig(OUTPUT_DIR / f"phase3_contributions_{name}.png", dpi=160)
+    plt.close(fig)
+
+
+def create_contribution_heatmap(
+    contributions: dict[str, tuple[np.ndarray, np.ndarray]],
+    name: str,
+    variables: list[int],
+) -> None:
+    """
+    Contributions of every out-of-control observation in observation order.
+
+    Unlike the mean bar charts, each alarm keeps its own column, so the small
+    alarms after the transition stay visible next to the fault block.
+    Observations without an alarm for that statistic are shown in grey.
+    """
+    fig, axes = plt.subplots(2, 1, figsize=(16, 10), sharex=True, constrained_layout=True)
+    for axis, (statistic, limit_name) in zip(axes, [("T2", "T2"), ("SPEx", "Q")]):
+        values, statistic_alarms = contributions[statistic]
+        shown = np.where(statistic_alarms[:, None], values, np.nan)
+        largest = np.nanmax(np.abs(shown))
+        if statistic == "T2":
+            # T2 contributions can be negative, so a diverging symmetric log scale is used.
+            colormap = matplotlib.colormaps["coolwarm"].copy()
+            norm = SymLogNorm(linthresh=1, vmin=-largest, vmax=largest)
+        else:
+            # SPEx contributions below 0.01 are shown in the lowest colour.
+            colormap = matplotlib.colormaps["viridis"].copy()
+            norm = LogNorm(vmin=1e-2, vmax=largest)
+        colormap.set_bad("0.85")
+
+        image = axis.imshow(
+            shown.T,
+            aspect="auto",
+            interpolation="nearest",
+            cmap=colormap,
+            norm=norm,
+            extent=(0.5, len(values) + 0.5, len(variables) - 0.5, -0.5),
+        )
+        axis.set_yticks(np.arange(len(variables)), labels=variables, fontsize=7)
+        axis.set_ylabel("Variable")
+        axis.set_title(
+            f"{statistic} contributions of the {int(statistic_alarms.sum())} observations "
+            f"above the {limit_name} limit (grey: no {limit_name} alarm)"
+        )
+        fig.colorbar(image, ax=axis, label=f"{statistic} contribution")
+
+    axes[-1].set_xlabel("Observation order")
+    fig.suptitle(f"{name}: contributions of every out-of-control observation")
+    fig.savefig(OUTPUT_DIR / f"phase3_contribution_heatmap_{name}.png", dpi=160)
     plt.close(fig)
 
 
