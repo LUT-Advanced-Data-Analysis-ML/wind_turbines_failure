@@ -31,8 +31,8 @@ def main() -> None:
     print(f"Limits: T2 F = {limits['t2_f']:.2f}, Q JM = {limits['q_jm']:.2f}")
 
     # ============================ Steps 8-9: autoscale, project and compute T2 and Q ===========================
-    # The healthy turbine is projected as well, only as a reference row in the
-    # summary; its statistics are those of the observations the model was fitted on.
+    # The healthy turbine is projected as an in-sample reference row only;
+    # its alarm proportion is not an independent validation estimate.
     projections = {
         name: project(model, pca_x[name], n_components)
         for name in [HEALTHY_TURBINE, *FAULTY_TURBINES]
@@ -67,7 +67,7 @@ def main() -> None:
         summary.append(
             {
                 "turbine": name,
-                "role": "healthy reference" if name == HEALTHY_TURBINE else "faulty",
+                "role": "healthy in-sample" if name == HEALTHY_TURBINE else "faulty evaluation",
                 "observations": len(projection.t2),
                 "n_components": n_components,
                 "t2_alarms": int(t2_alarms.sum()),
@@ -107,7 +107,7 @@ def main() -> None:
             f"T2 = {row.t2_alarms}, Q = {row.q_alarms}; "
             f"with 3SD limits: {row.t2_or_q_alarm_percent_3sd:.1f}%"
         )
-        if row.role == "faulty":
+        if row.role == "faulty evaluation":
             print(
                 f"  first alarm: observation {row.first_alarm_observation}, "
                 f"last alarm: observation {row.last_alarm_observation}"

@@ -1,0 +1,2 @@
+selection_method,eigenvalue_threshold,n_observations,n_variables,n_components,cumulative_explained_variance_percent,healthy_evaluation,t2_alarms,q_alarms,t2_or_q_alarms,t2_or_q_alarm_percent
+Kaiser eigenvalue > 1 on full healthy data,1.0,1570,25,6,84.01381505900527,"in-sample, not independent validation",4,14,15,0.9554140127388535

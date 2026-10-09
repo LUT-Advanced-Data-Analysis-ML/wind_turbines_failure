@@ -11,24 +11,24 @@ No.14WT,A: transition observation,T2 or Q,theoretical,1,1,100.0
 No.14WT,A: transition observation,T2,3SD,1,1,100.0
 No.14WT,A: transition observation,Q,3SD,1,1,100.0
 No.14WT,A: transition observation,T2 or Q,3SD,1,1,100.0
-No.14WT,A: after transition,T2,theoretical,328,4,1.2195121951219512
-No.14WT,A: after transition,Q,theoretical,328,15,4.573170731707317
-No.14WT,A: after transition,T2 or Q,theoretical,328,19,5.7926829268292686
-No.14WT,A: after transition,T2,3SD,328,12,3.6585365853658534
+No.14WT,A: after transition,T2,theoretical,328,2,0.6097560975609756
+No.14WT,A: after transition,Q,theoretical,328,18,5.487804878048781
+No.14WT,A: after transition,T2 or Q,theoretical,328,20,6.097560975609756
+No.14WT,A: after transition,T2,3SD,328,0,0.0
 No.14WT,A: after transition,Q,3SD,328,0,0.0
-No.14WT,A: after transition,T2 or Q,3SD,328,12,3.6585365853658534
-No.14WT,B: alarm episodes,T2,theoretical,428,362,84.57943925233646
-No.14WT,B: alarm episodes,Q,theoretical,428,364,85.04672897196261
-No.14WT,B: alarm episodes,T2 or Q,theoretical,428,368,85.98130841121495
-No.14WT,B: alarm episodes,T2,3SD,428,368,85.98130841121495
+No.14WT,A: after transition,T2 or Q,3SD,328,0,0.0
+No.14WT,B: alarm episodes,T2,theoretical,428,360,84.11214953271028
+No.14WT,B: alarm episodes,Q,theoretical,428,368,85.98130841121495
+No.14WT,B: alarm episodes,T2 or Q,theoretical,428,370,86.44859813084112
+No.14WT,B: alarm episodes,T2,3SD,428,358,83.64485981308411
 No.14WT,B: alarm episodes,Q,3SD,428,358,83.64485981308411
-No.14WT,B: alarm episodes,T2 or Q,3SD,428,368,85.98130841121495
+No.14WT,B: alarm episodes,T2 or Q,3SD,428,358,83.64485981308411
 No.14WT,B: outside alarm episodes,T2,theoretical,258,0,0.0
-No.14WT,B: outside alarm episodes,Q,theoretical,258,9,3.488372093023256
-No.14WT,B: outside alarm episodes,T2 or Q,theoretical,258,9,3.488372093023256
-No.14WT,B: outside alarm episodes,T2,3SD,258,2,0.7751937984496124
+No.14WT,B: outside alarm episodes,Q,theoretical,258,8,3.10077519379845
+No.14WT,B: outside alarm episodes,T2 or Q,theoretical,258,8,3.10077519379845
+No.14WT,B: outside alarm episodes,T2,3SD,258,0,0.0
 No.14WT,B: outside alarm episodes,Q,3SD,258,0,0.0
-No.14WT,B: outside alarm episodes,T2 or Q,3SD,258,2,0.7751937984496124
+No.14WT,B: outside alarm episodes,T2 or Q,3SD,258,0,0.0
 No.39WT,A: fault period (before variable 13 transition),T2,theoretical,469,469,100.0
 No.39WT,A: fault period (before variable 13 transition),Q,theoretical,469,469,100.0
 No.39WT,A: fault period (before variable 13 transition),T2 or Q,theoretical,469,469,100.0
@@ -41,21 +41,21 @@ No.39WT,A: transition observation,T2 or Q,theoretical,1,1,100.0
 No.39WT,A: transition observation,T2,3SD,1,1,100.0
 No.39WT,A: transition observation,Q,3SD,1,1,100.0
 No.39WT,A: transition observation,T2 or Q,3SD,1,1,100.0
-No.39WT,A: after transition,T2,theoretical,935,4,0.42780748663101603
-No.39WT,A: after transition,Q,theoretical,935,34,3.6363636363636362
-No.39WT,A: after transition,T2 or Q,theoretical,935,38,4.064171122994653
-No.39WT,A: after transition,T2,3SD,935,12,1.2834224598930482
+No.39WT,A: after transition,T2,theoretical,935,2,0.21390374331550802
+No.39WT,A: after transition,Q,theoretical,935,49,5.240641711229946
+No.39WT,A: after transition,T2 or Q,theoretical,935,51,5.454545454545454
+No.39WT,A: after transition,T2,3SD,935,0,0.0
 No.39WT,A: after transition,Q,3SD,935,0,0.0
-No.39WT,A: after transition,T2 or Q,3SD,935,12,1.2834224598930482
-No.39WT,B: alarm episodes,T2,theoretical,560,474,84.64285714285714
-No.39WT,B: alarm episodes,Q,theoretical,560,483,86.25
-No.39WT,B: alarm episodes,T2 or Q,theoretical,560,487,86.96428571428572
-No.39WT,B: alarm episodes,T2,3SD,560,480,85.71428571428571
-No.39WT,B: alarm episodes,Q,3SD,560,470,83.92857142857143
-No.39WT,B: alarm episodes,T2 or Q,3SD,560,480,85.71428571428571
-No.39WT,B: outside alarm episodes,T2,theoretical,845,0,0.0
-No.39WT,B: outside alarm episodes,Q,theoretical,845,21,2.485207100591716
-No.39WT,B: outside alarm episodes,T2 or Q,theoretical,845,21,2.485207100591716
-No.39WT,B: outside alarm episodes,T2,3SD,845,2,0.2366863905325444
-No.39WT,B: outside alarm episodes,Q,3SD,845,0,0.0
-No.39WT,B: outside alarm episodes,T2 or Q,3SD,845,2,0.2366863905325444
+No.39WT,A: after transition,T2 or Q,3SD,935,0,0.0
+No.39WT,B: alarm episodes,T2,theoretical,584,472,80.82191780821918
+No.39WT,B: alarm episodes,Q,theoretical,584,495,84.76027397260275
+No.39WT,B: alarm episodes,T2 or Q,theoretical,584,497,85.1027397260274
+No.39WT,B: alarm episodes,T2,3SD,584,470,80.47945205479452
+No.39WT,B: alarm episodes,Q,3SD,584,470,80.47945205479452
+No.39WT,B: alarm episodes,T2 or Q,3SD,584,470,80.47945205479452
+No.39WT,B: outside alarm episodes,T2,theoretical,821,0,0.0
+No.39WT,B: outside alarm episodes,Q,theoretical,821,24,2.92326431181486
+No.39WT,B: outside alarm episodes,T2 or Q,theoretical,821,24,2.92326431181486
+No.39WT,B: outside alarm episodes,T2,3SD,821,0,0.0
+No.39WT,B: outside alarm episodes,Q,3SD,821,0,0.0
+No.39WT,B: outside alarm episodes,T2 or Q,3SD,821,0,0.0
