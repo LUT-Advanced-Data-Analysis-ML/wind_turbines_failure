@@ -9,7 +9,8 @@ timestamp column, so continuity and synchronization between turbines cannot
 be verified. WT2 is healthy and the other turbines develop faults. Variable
 names and their physical meanings are not supplied.
 
-Note: The script lives in src/, while the source workbook is kept in resources/ and the output plots and CSV files are written to outputs/.
+Note: The script lives in src/, while the source workbook is kept in resources/
+and exploratory plots and CSV files are written to archive/exploratory/.
 """
 
 from pathlib import Path
@@ -21,7 +22,7 @@ import matplotlib.pyplot as plt
 # Define constants for file paths, turbine names, and variable identifiers.
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 DATA_FILE = PROJECT_DIR / "resources" / "wind_turbine_fault_diagnosis_data.xlsx"
-OUTPUT_DIR = PROJECT_DIR / "outputs"
+OUTPUT_DIR = PROJECT_DIR / "archive" / "exploratory"
 ALL_TURBINES = ["No.2WT", "No.3", "No.14WT", "No.39WT"]
 PCA_CANDIDATES = ["No.2WT", "No.14WT", "No.39WT"]
 COMMON_COLUMNS = list(range(1, 28))

@@ -4,7 +4,7 @@ Builds the PCA-ready X matrices used by every PCA script: the three
 structurally compatible turbines, their common variables 1-27, the single
 missing No.14WT value linearly interpolated, and the variables that are
 constant in the healthy turbine removed. The reasoning behind these
-decisions is recorded in outputs/pretreatment_investigation_2026-09-24.md.
+decisions is recorded in archive/exploratory/pretreatment_investigation_2026-09-24.md.
 
 Note: Centering and scaling are not applied here, because each analysis must
 choose which healthy observations its scaling parameters are fitted on.
@@ -19,6 +19,7 @@ import pandas as pd
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 DATA_FILE = PROJECT_DIR / "resources" / "wind_turbine_fault_diagnosis_data.xlsx"
 OUTPUT_DIR = PROJECT_DIR / "outputs"
+EXPLORATORY_OUTPUT_DIR = PROJECT_DIR / "archive" / "exploratory"
 TURBINES = ["No.2WT", "No.14WT", "No.39WT"]
 HEALTHY_TURBINE = "No.2WT"
 FAULTY_TURBINES = ["No.14WT", "No.39WT"]

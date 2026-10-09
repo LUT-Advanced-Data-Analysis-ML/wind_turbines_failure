@@ -1,8 +1,13 @@
 # Modelling investigation record
 
+> Historical snapshot: the five-PC/70-30 results below were superseded by the
+> full-healthy six-PC Option 2 model. They are retained as evidence of the
+> validation issue, not as current Submission 3 results. See the repository
+> README and `outputs/` for the current pipeline and outputs.
+
 Wind Turbines Level A — 7 October 2026
 
-This record documents the first implementation of the modelling plan of report 2 (Figure 5) and the open questions it raised. The pretreated data are those of `pretreatment_investigation_2026-09-24.md`: No.2WT, No.14WT and No.39WT with the same 25 variables. Phase 1 (`src/phase1_healthy_model.py`), Phase 2 (`src/phase2_fault_detection.py`) and Phase 3 (`src/phase3_diagnostics.py`) write their results to `outputs/phase1_*`, `outputs/phase2_*` and `outputs/phase3_*`. Theoretical limits are 99%: F-distribution for T² and Jackson–Mudholkar for Q. An alarm is an observation above the T² or the Q limit. Observation numbers are one-based.
+This record documents the first implementation of the modelling plan of report 2 (Figure 5) and the open questions it raised. The pretreated data are those of `archive/exploratory/pretreatment_investigation_2026-09-24.md`: No.2WT, No.14WT and No.39WT with the same 25 variables. Its superseded generated results are now in `archive/legacy_70_30/`; the current Phase 1–3 scripts write their final results to `outputs/`. Theoretical limits are 99%: F-distribution for T² and Jackson–Mudholkar for Q. An alarm is an observation above the T² or the Q limit. Observation numbers are one-based.
 
 ## Phase 1: healthy reference model
 

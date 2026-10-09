@@ -12,13 +12,13 @@ import numpy as np
 import pandas as pd
 
 from pca_monitoring import fit_model
-from pretreatment import HEALTHY_TURBINE, OUTPUT_DIR, load_pca_data
+from pretreatment import EXPLORATORY_OUTPUT_DIR, HEALTHY_TURBINE, load_pca_data
 
 
 MAX_LAG = 60  # Observation steps; timestamps are not available.
 SELECTED_LAGS = (1, 10, 30, 60)
-FIGURE = OUTPUT_DIR / "healthy_temporal_variogram.png"
-SUMMARY = OUTPUT_DIR / "healthy_temporal_variogram_summary.csv"
+FIGURE = EXPLORATORY_OUTPUT_DIR / "healthy_temporal_variogram.png"
+SUMMARY = EXPLORATORY_OUTPUT_DIR / "healthy_temporal_variogram_summary.csv"
 COLORS = {"early": "#277DA1", "middle": "#F8961E", "late": "#9B5DE5"}
 
 

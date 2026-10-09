@@ -6,7 +6,7 @@ This record documents the read-only data investigations and the resulting pretre
 
 ## Extreme-value audit
 
-We calculated Tukey 1.5 × IQR fences separately for each of the 25 retained variables in each turbine. A flag is a prompt to inspect an observation, not a determination that it is erroneous. The reproducible 75-row summary is `outputs/pretreatment_extreme_value_diagnostics.csv`; the existing figure illustrates No.14WT variables 5 and 11 only.
+We calculated Tukey 1.5 × IQR fences separately for each of the 25 retained variables in each turbine. A flag is a prompt to inspect an observation, not a determination that it is erroneous. The reproducible 75-row summary is `archive/exploratory/pretreatment_extreme_value_diagnostics.csv`; the existing figure in that directory illustrates No.14WT variables 5 and 11 only.
 
 | Turbine | Flagged cells | Variables with flags | Notable observations |
 | --- | ---: | ---: | --- |

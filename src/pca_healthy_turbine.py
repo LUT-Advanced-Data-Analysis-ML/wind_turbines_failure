@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt
 # File paths and turbine selection are shared with the modelling scripts.
 # The healthy turbine is used to fit the PCA model.
 from pretreatment import (
+    EXPLORATORY_OUTPUT_DIR as OUTPUT_DIR,
     HEALTHY_TURBINE,
-    OUTPUT_DIR,
     TURBINES,
     interpolate_missing_value,
     load_aligned_data,
