@@ -35,7 +35,7 @@ This Level A project uses a healthy turbine as the reference for multivariate st
 | `src/diagnose_healthy_variograms.py` | Optional exploratory investigation of changing healthy PC-score variation. It recomputes its own healthy PCA and is **not** a prerequisite for the final model. |
 | `src/inspect_wind_turbine_data.py` | Optional initial raw-data inspection and descriptive plots. Not part of the current three-phase pipeline. |
 | `src/pca_healthy_turbine.py` | Earlier pretreatment/healthy-PCA exploration. Useful background, but **not** the final Kaiser-selected monitoring model and not a pipeline step. |
-| `outputs/` | Only the 22 current Submission 3 outputs from Phases 1–3. Running a phase regenerates its corresponding files. |
+| `outputs/` | Only the 23 current Submission 3 outputs from Phases 1–3. Running a phase regenerates its corresponding files. |
 | `archive/legacy_70_30/` | Superseded chronological-split results and investigation notes; retained as methodological evidence, not pipeline inputs. |
 | `archive/exploratory/` | Earlier raw-data/PCA exploration and temporal variogram results. Optional scripts write here, not to `outputs/`. |
 | `archive/README.md` | Inventory and interpretation of the archived work. |
@@ -67,7 +67,7 @@ The earlier chronological 70/30 healthy split and its five-PC monitoring files a
 | Phase 2 | `phase2_control_charts_No.14WT.png`, `phase2_control_charts_No.39WT.png` | Faulty-turbine T² and Q control charts under the fixed healthy limits. |
 | Phase 3 | `phase3_fault_periods.csv`, `phase3_alarm_proportions.csv` | Descriptive transition/episode segments and their alarm proportions. |
 | Phase 3 | `phase3_contributions.csv`, `phase3_sensor_ranking.csv`, `phase3_constant_variable_check.csv` | Variable contributions/ranks and a separate check of excluded healthy-constant variables 12 and 15. |
-| Phase 3 | `phase3_contributions_No.*WT.png`, `phase3_contribution_heatmap_No.*WT.png`, `phase3_biplots_No.*WT.png` | Mean contributions, individual-observation contributions, and time-coloured score/loading views for each faulty turbine. |
+| Phase 3 | `phase3_contributions_No.*WT.png`, `phase3_contribution_heatmap_No.*WT.png`, `phase3_biplots_No.*WT.png`, `phase3_report_biplot_PC1_PC2.png` | Mean contributions, individual-observation contributions, time-coloured score/loading views for each faulty turbine, and one PC1–PC2 biplot of both faulty turbines for the report. |
 
 For a quick numerical check, `phase2_alarm_summary.csv` should report **15/1,570 (0.96%)** No.2WT alarms, **378/686 (55.10%)** No.14WT alarms, and **521/1,405 (37.08%)** No.39WT alarms under the T²-or-Q rule. `phase3_sensor_ranking.csv` puts variables **9, 13, and 22** in the top five for both statistics in both faulty recordings. Small last-decimal-place differences in floating-point limits across numerical-library versions are possible; compare rounded values and alarm counts, not byte-for-byte CSV identity.
 
@@ -83,7 +83,7 @@ python src/pca_healthy_turbine.py
 python src/diagnose_healthy_variograms.py
 ```
 
-The variogram script writes `archive/exploratory/healthy_temporal_variogram.png` and `archive/exploratory/healthy_temporal_variogram_summary.csv`. The other two scripts create raw-data, pretreatment, and initial PCA descriptive files in `archive/exploratory/`. They do not replace Phase 1 or add files to the final `outputs/` directory. Do not run optional scripts merely to reproduce the current monitoring charts and alarm summaries.
+The variogram script writes `archive/exploratory/healthy_temporal_variogram.png` and `archive/exploratory/healthy_temporal_variogram_summary.csv`, plus `healthy_score_trajectories_variograms.png` (all six retained PC scores with moving-window variograms) and `healthy_block_holdout.csv` (each healthy block hidden in turn and projected onto a model of the rest). The other two scripts create raw-data, pretreatment, and initial PCA descriptive files in `archive/exploratory/`. They do not replace Phase 1 or add files to the final `outputs/` directory. Do not run optional scripts merely to reproduce the current monitoring charts and alarm summaries.
 
 ## Reproducibility and Interpretation Notes
 

@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm, SymLogNorm
+from matplotlib.colors import ListedColormap, LogNorm, SymLogNorm
 
 from pca_monitoring import (
     PCAModel,
@@ -165,6 +165,7 @@ def main() -> None:
         create_time_coloured_biplots(
             model, projections[HEALTHY_TURBINE], projections[name], name, variables
         )
+    create_report_biplot(model, projections, variables)
 
     # ============================ Extra check: healthy constant variables 12 and 15 ===========================
     aligned = load_aligned_data()
@@ -465,6 +466,79 @@ def create_time_coloured_biplots(
     fig.colorbar(points, ax=axes, label=f"{name} observation order", shrink=0.8)
     fig.suptitle(f"{name} scores on the final {HEALTHY_TURBINE} model (time-coloured biplots)")
     fig.savefig(OUTPUT_DIR / f"phase3_biplots_{name}.png", dpi=160)
+    plt.close(fig)
+
+
+def create_report_biplot(
+    model: PCAModel, projections: dict[str, Projection], variables: list[int]
+) -> None:
+    """
+    PC1-PC2 biplot of both faulty turbines over the healthy scores.
+
+    One row per faulty turbine: the left panel shows every observation and
+    the right panel zooms in on the healthy score range. Both turbines are
+    coloured by observation order: the faulty one in colour and the healthy
+    one in grey (light = early, dark = late).
+    """
+    explained = 100 * model.eigenvalues / model.eigenvalues.sum()
+    healthy = projections[HEALTHY_TURBINE]
+    healthy_order = np.arange(1, len(healthy.t2) + 1)
+    healthy_extent = 1.3 * np.percentile(np.abs(healthy.scores[:, :2]), 99.5, axis=0)
+    # The lightest greys are left out so early healthy points stay visible.
+    healthy_colormap = ListedColormap(plt.cm.Greys(np.linspace(0.25, 0.95, 256)))
+    loading_pair = model.loadings[:, :2]
+    # The three longest arrows of each axis are labelled.
+    label_indices = set()
+    for component in (0, 1):
+        label_indices.update(np.argsort(np.abs(loading_pair[:, component]))[::-1][:3])
+
+    fig, axes = plt.subplots(len(FAULTY_TURBINES), 2, figsize=(13, 11.5),
+                             constrained_layout=True)
+    for row, name in enumerate(FAULTY_TURBINES):
+        scores = projections[name].scores
+        for column, zoom in enumerate([False, True]):
+            axis = axes[row, column]
+            healthy_points = axis.scatter(
+                healthy.scores[:, 0], healthy.scores[:, 1], c=healthy_order,
+                cmap=healthy_colormap, s=6, alpha=0.6,
+            )
+            points = axis.scatter(scores[:, 0], scores[:, 1],
+                                  c=np.arange(1, len(scores) + 1), cmap="viridis",
+                                  s=9, alpha=0.8)
+            if zoom:
+                axis.set_xlim(-healthy_extent[0], healthy_extent[0])
+                axis.set_ylim(-healthy_extent[1], healthy_extent[1])
+
+            # One common scale per panel keeps the arrow directions comparable.
+            x_limits, y_limits = axis.get_xlim(), axis.get_ylim()
+            half_range = min(np.ptp(x_limits), np.ptp(y_limits)) / 2
+            arrow_scale = 0.8 * half_range / np.max(np.abs(loading_pair))
+            for index, (variable, loading) in enumerate(zip(variables, loading_pair)):
+                end_x, end_y = loading * arrow_scale
+                axis.annotate("", xy=(end_x, end_y), xytext=(0, 0),
+                              arrowprops={"arrowstyle": "->", "color": "tab:red", "alpha": 0.6})
+                if index in label_indices:
+                    # Labels sit just beyond the arrow tip, away from the origin.
+                    direction = loading / np.linalg.norm(loading)
+                    axis.annotate(str(variable), (end_x, end_y),
+                                  xytext=tuple(10 * direction), textcoords="offset points",
+                                  ha="center", va="center", fontsize=8, color="tab:red")
+            axis.set_xlim(x_limits)
+            axis.set_ylim(y_limits)
+
+            axis.axhline(0, color="0.5", linewidth=0.8)
+            axis.axvline(0, color="0.5", linewidth=0.8)
+            axis.set_xlabel(f"PC1 scores ({explained[0]:.2f}%)")
+            axis.set_ylabel(f"PC2 scores ({explained[1]:.2f}%)")
+            view = "zoom on the healthy score range" if zoom else "all observations"
+            axis.set_title(f"{name}: {view}")
+            axis.grid(alpha=0.2)
+        fig.colorbar(points, ax=axes[row], label=f"{name} observation order", shrink=0.9)
+
+    fig.colorbar(healthy_points, ax=axes, location="bottom", shrink=0.5, aspect=40,
+                 label=f"{HEALTHY_TURBINE} (healthy) observation order")
+    fig.suptitle(f"Faulty turbines on the PC1-PC2 plane of the final {HEALTHY_TURBINE} model")
+    fig.savefig(OUTPUT_DIR / "phase3_report_biplot_PC1_PC2.png", dpi=160)
     plt.close(fig)
 
 
