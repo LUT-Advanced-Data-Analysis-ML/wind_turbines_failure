@@ -1,9 +1,8 @@
-"""Phase 2 of the modelling plan: fault detection in No.14WT and No.39WT.
+"""Phase 2: fault detection in No.14WT and No.39WT.
 
-Follows steps 8-10 of the PCA-based fault detection workflow (report 2,
-Figure 5): autoscale the faulty turbines with the healthy No.2WT statistics,
-project them onto the final healthy model, compute T2 and Q, and chart them
-against the healthy control limits.
+Autoscale the faulty turbines with healthy No.2WT statistics, project them
+onto the fixed healthy model, and chart their T2 and Q statistics against
+the healthy control limits.
 
 Note: The final model, its number of components and its limits are loaded
 from the Phase 1 outputs. Nothing is refitted on the faulty turbines.
@@ -30,7 +29,7 @@ def main() -> None:
     )
     print(f"Limits: T2 F = {limits['t2_f']:.2f}, Q JM = {limits['q_jm']:.2f}")
 
-    # ============================ Steps 8-9: autoscale, project and compute T2 and Q ===========================
+    # Project turbines and calculate T2 and Q monitoring statistics.
     # The healthy turbine is projected as an in-sample reference row only;
     # its alarm proportion is not an independent validation estimate.
     projections = {
@@ -87,7 +86,7 @@ def main() -> None:
     summary = pd.DataFrame(summary)
     summary.to_csv(OUTPUT_DIR / "phase2_alarm_summary.csv", index=False)
 
-    # ============================ Step 10: T2 and Q charts of the faulty turbines ===========================
+    # Plot T2 and Q control charts for the faulty turbines.
     for name in FAULTY_TURBINES:
         projection = projections[name]
         create_control_charts(
@@ -99,7 +98,7 @@ def main() -> None:
         )
 
     print("\n========================================================")
-    print("\nSteps 8-10: out-of-control observations")
+    print("\nOut-of-control observations")
     for row in summary.itertuples():
         print(
             f"{row.turbine} ({row.role}): T2 or Q alarms = {row.t2_or_q_alarms} / "

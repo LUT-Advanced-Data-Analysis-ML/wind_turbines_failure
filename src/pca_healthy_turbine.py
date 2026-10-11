@@ -499,8 +499,7 @@ def create_pca_plots(
     fig.savefig(OUTPUT_DIR / "pca_healthy_correlation_heatmap.png", dpi=160)
     plt.close(fig)
 
-    # A separate TA-style overview pairs biplots with signed loading bars.
-    # Existing PCA figures above are retained unchanged.
+    # Create an overview combining score/loading biplots with signed loadings.
     create_biplot_loading_overview(
         variables, scores, loadings, explained_ratio
     )

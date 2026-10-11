@@ -1,9 +1,9 @@
-"""Phase 1: full-healthy No.2WT PCA/MSPC reference model (TA Option 2).
+"""Phase 1: PCA/MSPC reference model fitted on all healthy No.2WT observations.
 
-Fit and autoscale on all healthy observations, retain the components with
-eigenvalues greater than one, and calculate the existing T2 and Q limits.
-The former 70/30 analysis is retained in the historical outputs but is not
-used to choose the model: its later block contained new healthy variation.
+Autoscale the healthy data, retain components with eigenvalues greater than
+one, and calculate the T2 and Q control limits. The superseded 70/30 analysis
+is retained in archive/legacy_70_30/; its later block contained healthy
+variation absent from the calibration block and is not used to select the model.
 No.14WT and No.39WT are reserved for evaluation in Phase 2.
 """
 
@@ -86,7 +86,7 @@ def main() -> None:
     )
 
     print("\n========================================================")
-    print("\nFull-healthy reference model (TA Option 2)")
+    print("\nFull-healthy No.2WT reference model")
     print(
         f"Fitted on all {model.n_observations} No.2WT observations; "
         f"Kaiser eigenvalue > {KAISER_EIGENVALUE_THRESHOLD:g} selects "

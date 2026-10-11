@@ -1,11 +1,9 @@
-"""Phase 3 of the modelling plan: sensor diagnostics for No.14WT and No.39WT.
+"""Phase 3: sensor diagnostics for No.14WT and No.39WT.
 
-Follows steps 11-14 of the PCA-based fault detection workflow (report 2,
-Figure 5): select the out-of-control observations and the fault period of
-each faulty turbine, compute T2 and SPEx contributions of the out-of-control
-observations, draw time-coloured biplots against the healthy turbine, check
-the alarm proportions, and rank the variables that are most representative
-of the faults.
+Select the out-of-control observations and the fault period of each faulty
+turbine, compute T2 and SPEx contributions, draw time-coloured biplots against
+the healthy turbine, check alarm proportions, and rank the variables most
+representative of the faults.
 
 Note: The final healthy model is loaded from the Phase 1 outputs. The faulty
 turbines are projected onto it again because contributions need the scaled
@@ -68,7 +66,7 @@ def main() -> None:
         assert np.allclose(projections[name].q, saved["q"], rtol=1e-12)
         assert np.array_equal(alarms[name], saved["t2_or_q_alarm"].to_numpy())
 
-    # ============================ Step 11: out-of-control observations and fault periods ===========================
+    # ============================ Identify out-of-control observations and fault periods.
     periods = {}
     episodes = {}
     comparison = []
@@ -131,11 +129,11 @@ def main() -> None:
             f"{row.alarm_percent:.1f}% alarms)"
         )
 
-    # ============================ Steps 12a-b: T2 and SPEx contributions ===========================
+    # ============================ Calculate T2 and SPEx contributions.
     # Each statistic is explained by its own out-of-control observations: T2
     # contributions are averaged over the T2 alarms and SPEx contributions
-    # over the Q alarms. The scaled values already use the healthy statistics,
-    # so the contributions are compared without further normalisation.
+    # over the Q alarms. Contributions use healthy-data scaling and are
+    # compared within each statistic without further normalisation.
     contribution_rows = []
     for name in FAULTY_TURBINES:
         projection = projections[name]
@@ -160,7 +158,7 @@ def main() -> None:
     for name in FAULTY_TURBINES:
         create_contribution_plot(contributions_table, name, variables)
 
-    # ============================ Step 12c: time-coloured biplots ===========================
+    # Plot time-coloured biplots.
     for name in FAULTY_TURBINES:
         create_time_coloured_biplots(
             model, projections[HEALTHY_TURBINE], projections[name], name, variables
@@ -206,7 +204,7 @@ def main() -> None:
             f"(range {row.minimum:g}-{row.maximum:g})"
         )
 
-    # ============================ Step 13: alarm proportions ===========================
+    # ============================ Calculate alarm proportions.
     proportion_rows = []
     for name in FAULTY_TURBINES:
         projection = projections[name]
@@ -237,7 +235,7 @@ def main() -> None:
     proportions.to_csv(OUTPUT_DIR / "phase3_alarm_proportions.csv", index=False)
 
     print("\n========================================================")
-    print("\nStep 13: T2 or Q alarm proportions (theoretical 99% limits)")
+    print("\nT2 or Q alarm proportions (theoretical 99% limits)")
     selected = proportions[
         (proportions["statistic"] == "T2 or Q") & (proportions["limit_type"] == "theoretical")
     ]
@@ -252,11 +250,12 @@ def main() -> None:
         "are not independent."
     )
 
-    # ============================ Step 14: fault-sensitive sensors ===========================
+    # ============================ Rank fault-sensitive sensors.
     # Variables are ranked by the magnitude of their mean contribution over
-    # the out-of-control observations; T2 contributions can be negative, so
-    # the sign only gives the direction. A variable is reported when it is
-    # among the top variables for both statistics in both turbines.
+    # the out-of-control observations. T2 contributions can be negative, so
+    # variables are ranked by absolute mean contribution while retaining the
+    # sign. A variable is reported when it is among the top variables for
+    # both statistics in both turbines.
     ranking = contributions_table.copy()
     ranking["absolute_mean_contribution"] = ranking["mean_contribution"].abs()
     ranking["rank"] = ranking.groupby(["turbine", "statistic"])[
@@ -270,7 +269,7 @@ def main() -> None:
     combinations = len(FAULTY_TURBINES) * 2
 
     print("\n========================================================")
-    print(f"\nStep 14: top {TOP_VARIABLES} variables by mean contribution over the out-of-control observations")
+    print(f"\nTop {TOP_VARIABLES} variables by mean contribution over the out-of-control observations")
     for (name, statistic), group in top.groupby(["turbine", "statistic"], sort=False):
         values = ", ".join(
             f"{row.variable} ({row.mean_contribution:.3g})" for row in group.itertuples()
