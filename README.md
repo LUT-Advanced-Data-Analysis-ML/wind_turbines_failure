@@ -50,7 +50,7 @@ The workbook must remain at the path shown above and retain the exact sheet name
 
 ## Current Modelling Methodology
 
-Phase 1 implements the TA's Option 2: **all** healthy No.2WT observations supply the sample mean and sample standard deviation used for autoscaling and the PCA reference model. The Kaiser rule retains every healthy covariance eigenvalue strictly greater than 1; the supplied data select **six PCs**, explaining **84.01%** of standardized healthy variance. No faulty observation influences scaling, PCA, PC selection, or control limits. Phase 2 applies the saved healthy means, scales, loadings, and six-PC count to both faulty turbines.
+Phase 1 calibrates the PCA/MSPC reference model using all healthy No.2WT observations. **All** healthy No.2WT observations supply the sample mean and sample standard deviation used for autoscaling and the PCA reference model. The Kaiser rule retains every healthy covariance eigenvalue strictly greater than 1; the supplied data select **six PCs**, explaining **84.01%** of standardized healthy variance. No faulty observation influences scaling, PCA, PC selection, or control limits. Phase 2 applies the saved healthy means, scales, loadings, and six-PC count to both faulty turbines.
 
 The main alarm rule uses separate 99% theoretical limits: an F-distribution T² limit and a Jackson–Mudholkar approximation for Q based on excluded eigenvalues. With the current data these are **T² = 16.946** and **Q = 12.067** (rounded). An observation alarms if either statistic exceeds its limit. Charts also show mean-plus-three-standard-deviation lines for comparison; those lines do not determine the reported main alarms.
 
@@ -75,7 +75,7 @@ Files such as `phase1_alarm_summary.csv`, `phase1_control_charts_n4.png`, `phase
 
 ## Optional Diagnostics
 
-These commands can be run from the repository root after setup, in any order. Neither feeds the three-phase model:
+These commands can be run from the repository root after setup, in any order. None of these scripts supplies inputs to the three-phase model:
 
 ```bash
 python src/inspect_wind_turbine_data.py
@@ -89,7 +89,7 @@ The variogram script writes `archive/exploratory/healthy_temporal_variogram.png`
 
 - The commands assume the repository root is the current directory. Running from elsewhere can make relative shell paths fail, although the Python data/output paths themselves are resolved from the script locations.
 - The supplied workbook and `outputs/` directory are tracked. Phase scripts overwrite their own generated files; use a fresh clone or copy if you need to preserve the checked-in examples while testing. Archived evidence is separate and is not read by the production pipeline.
-- The 0.96% healthy alarm proportion is **in-sample**, not an independently validated false-alarm rate. Option 2 has no separate healthy validation set. The two marginal 99% limits do not guarantee a 1% combined alarm rate.
+- The 0.96% healthy alarm proportion is **in-sample**, not an independently validated false-alarm rate. Using all healthy observations for calibration leaves no independent healthy validation set. The two marginal 99% limits do not guarantee a 1% combined alarm rate.
 - No observation-level fault labels, verified timestamps, or sensor names are supplied. Alarm proportions are not detection accuracy; contribution rankings indicate statistical sensitivity, not physical causality.
 - No.14WT observations 359–686 and No.39WT observations 471–798 contain a near-identical shared block, so their corresponding post-transition alarms are not independent evidence. PC6 (eigenvalue about 1.014) is also close to the Kaiser threshold, and the interpolated No.14WT transition row should not be overinterpreted.
 - The current repository contains no automated test suite. The complete pipeline was rebuilt in this repository with Python 3.12 and locally available NumPy/pandas/SciPy/Matplotlib/openpyxl versions; it reproduced the PC count, explained variance, alarm counts, and sensor ranking. The exact pinned package set in `requirements.txt` was not separately installed during that check.
