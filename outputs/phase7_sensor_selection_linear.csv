@@ -1,0 +1,2 @@
+n_sensors,added_sensor,sensors,n_components,fault_detection_percent_No.14WT,after_transition_percent_No.14WT,fault_detection_percent_No.39WT,after_transition_percent_No.39WT,cv_false_alarm_percent,cv_false_alarm_se,check_a_fault_detected,check_b_quiet_after_transition,check_c_few_false_alarms,same_result
+1,9,9,1,100.0,0.0,100.0,0.0,0.0,0.0,True,True,True,True

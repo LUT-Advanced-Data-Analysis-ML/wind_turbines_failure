@@ -1,0 +1,4 @@
+n_sensors,added_sensor,sensors,n_components,fault_detection_percent_No.14WT,after_transition_percent_No.14WT,fault_detection_percent_No.39WT,after_transition_percent_No.39WT,cv_false_alarm_percent,cv_false_alarm_se,check_a_fault_detected,check_b_quiet_after_transition,check_c_few_false_alarms,same_result
+1,20,20,4,100.0,0.0,100.0,1.7112299465240641,4.9837837837837835,3.5618463543722454,True,True,False,False
+2,22,20 22,4,100.0,0.0,100.0,0.21390374331550802,6.133333333333333,3.7067505985701272,True,True,False,False
+3,21,20 22 21,4,100.0,0.0,100.0,0.21390374331550802,1.4522522522522523,0.8663013595817455,True,True,True,True
