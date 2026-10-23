@@ -10,7 +10,14 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from pca_monitoring import CONFIDENCE, fit_model, project, t2_limit_f, three_sigma_limit
+from pca_monitoring import (
+    CONFIDENCE,
+    fit_model,
+    project,
+    spe_contributions,
+    t2_limit_f,
+    three_sigma_limit,
+)
 
 # One-sensor kernels. The linear kernel is only used to
 # check the kernel code against linear PCA.
@@ -215,8 +222,8 @@ def verify_linear_kernel(x_reference: pd.DataFrame, x_new: pd.DataFrame, n_compo
     Check that the linear kernel reproduces linear PCA exactly.
 
     With k(x, y) = x'y the kernel scores are the linear PCA scores up to the
-    arbitrary sign of each component, so T2, Q and the partial scores
-    z_l p_la must agree with pca_monitoring.
+    arbitrary sign of each component, so T2, Q, the partial scores z_l p_la
+    and the Q contributions e_l^2 must agree with pca_monitoring.
     """
     kernel_model = fit_kernel_model(x_reference, "linear")
     linear_model = fit_model(x_reference)
@@ -231,6 +238,13 @@ def verify_linear_kernel(x_reference: pd.DataFrame, x_new: pd.DataFrame, n_compo
         * linear_model.loadings[:, :n_components][:, None, :]
     )
     assert np.allclose(kernel_projection.partial_scores, linear_partial * signs, rtol=1e-6, atol=1e-8)
+    q_tolerance = 1e-9 * max(1.0, np.abs(linear_projection.q).max())
+    assert np.allclose(
+        partial_q_contributions(kernel_model, kernel_projection),
+        spe_contributions(linear_projection),
+        rtol=1e-6,
+        atol=q_tolerance,
+    )
 
 
 def kernel_limits(
@@ -280,6 +294,53 @@ def partial_score_contributions(
     if not normalise:
         return contributions
     return contributions / contributions.sum(axis=1, keepdims=True)
+
+
+def partial_q_contributions(model: KernelModel, projection: KernelProjection) -> np.ndarray:
+    """
+    Sensor contributions to Q, M x K; each row adds up to the Q of that observation.
+
+    The feature space of a kernel that is a sum of one-sensor kernels is made
+    of one block per sensor, so the residual of x splits into these blocks
+    and Q = sum_l Q_l, with Q_l the squared length of block l:
+    Q_l = kc_l(x, x) - 2 sum_a y_a y_a^(l) + y' G_l y, where
+    G_l[a, b] = d_a' Kc_l d_b, d_a = u_a / sqrt(w_a) and Kc_l is the centred
+    reference kernel matrix of sensor l (the G_l add up to the identity).
+    With the linear kernel, Q_l is the squared residual e_l^2 of linear PCA.
+    """
+    n_components = projection.scores.shape[1]
+    directions = _score_directions(model, n_components)
+    z = projection.scaled
+    scores = projection.scores
+    contributions = np.empty((len(z), len(model.variables)))
+    gram_total = np.zeros((n_components, n_components))
+    for index in range(len(model.variables)):
+        reference = model.scaled[:, index]
+        sensor = sensor_kernel(reference, reference, model.family, model.width)
+        centred = (
+            sensor
+            - model.column_means[index][None, :]
+            - model.column_means[index][:, None]
+            + model.grand_means[index]
+        )
+        gram = directions.T @ centred @ directions
+        gram_total += gram
+
+        row_means = sensor_kernel(z[:, index], reference, model.family, model.width).mean(axis=1)
+        self_kernel = (
+            sensor_self_kernel(z[:, index], model.family) - 2 * row_means + model.grand_means[index]
+        )
+        contributions[:, index] = (
+            self_kernel
+            - 2 * np.sum(scores * projection.partial_scores[index], axis=1)
+            + np.einsum("ma,ab,mb->m", scores, gram, scores)
+        )
+
+    tolerance = 1e-9 * max(1.0, np.abs(projection.q).max())
+    assert np.allclose(gram_total, np.eye(n_components), atol=1e-8)
+    assert np.allclose(contributions.sum(axis=1), projection.q, rtol=1e-7, atol=tolerance)
+    assert contributions.min() > -tolerance, "Squared block lengths cannot be negative."
+    return contributions
 
 
 def save_kernel_settings(

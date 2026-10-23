@@ -1,0 +1,5 @@
+turbine,statistic,period,kernel_top,linear_top,top_overlap,spearman
+No.14WT,T2,A: fault period (before variable 13 transition),26 27 18 23 19,13 9 22 21 20,0,-0.6053846153846154
+No.14WT,Q,A: fault period (before variable 13 transition),13 4 3 21 20,9 14 13 22 17,1,-0.023076923076923078
+No.39WT,T2,A: fault period (before variable 13 transition),25 26 17 27 16,13 9 22 27 20,1,0.026153846153846153
+No.39WT,Q,A: fault period (before variable 13 transition),22 20 9 21 13,9 14 13 22 16,3,0.3153846153846154
