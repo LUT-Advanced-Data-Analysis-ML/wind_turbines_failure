@@ -1,0 +1,61 @@
+turbine,model,period,statistic,observations,alarms,alarm_percent
+No.14WT,kernel,A: fault period (before variable 13 transition),T2,357,0,0.0
+No.14WT,kernel,A: fault period (before variable 13 transition),Q,357,357,100.0
+No.14WT,kernel,A: fault period (before variable 13 transition),T2 or Q,357,357,100.0
+No.14WT,kernel,A: transition observation,T2,1,0,0.0
+No.14WT,kernel,A: transition observation,Q,1,1,100.0
+No.14WT,kernel,A: transition observation,T2 or Q,1,1,100.0
+No.14WT,kernel,A: after transition,T2,328,4,1.2195121951219512
+No.14WT,kernel,A: after transition,Q,328,13,3.9634146341463414
+No.14WT,kernel,A: after transition,T2 or Q,328,17,5.182926829268292
+No.14WT,kernel,B: alarm episodes,T2,390,4,1.0256410256410255
+No.14WT,kernel,B: alarm episodes,Q,390,362,92.82051282051282
+No.14WT,kernel,B: alarm episodes,T2 or Q,390,366,93.84615384615384
+No.14WT,kernel,B: outside alarm episodes,T2,296,0,0.0
+No.14WT,kernel,B: outside alarm episodes,Q,296,9,3.040540540540541
+No.14WT,kernel,B: outside alarm episodes,T2 or Q,296,9,3.040540540540541
+No.14WT,linear,A: fault period (before variable 13 transition),T2,357,357,100.0
+No.14WT,linear,A: fault period (before variable 13 transition),Q,357,357,100.0
+No.14WT,linear,A: fault period (before variable 13 transition),T2 or Q,357,357,100.0
+No.14WT,linear,A: transition observation,T2,1,1,100.0
+No.14WT,linear,A: transition observation,Q,1,1,100.0
+No.14WT,linear,A: transition observation,T2 or Q,1,1,100.0
+No.14WT,linear,A: after transition,T2,328,2,0.6097560975609756
+No.14WT,linear,A: after transition,Q,328,0,0.0
+No.14WT,linear,A: after transition,T2 or Q,328,2,0.6097560975609756
+No.14WT,linear,B: alarm episodes,T2,379,360,94.9868073878628
+No.14WT,linear,B: alarm episodes,Q,379,358,94.45910290237467
+No.14WT,linear,B: alarm episodes,T2 or Q,379,360,94.9868073878628
+No.14WT,linear,B: outside alarm episodes,T2,307,0,0.0
+No.14WT,linear,B: outside alarm episodes,Q,307,0,0.0
+No.14WT,linear,B: outside alarm episodes,T2 or Q,307,0,0.0
+No.39WT,kernel,A: fault period (before variable 13 transition),T2,469,0,0.0
+No.39WT,kernel,A: fault period (before variable 13 transition),Q,469,469,100.0
+No.39WT,kernel,A: fault period (before variable 13 transition),T2 or Q,469,469,100.0
+No.39WT,kernel,A: transition observation,T2,1,0,0.0
+No.39WT,kernel,A: transition observation,Q,1,1,100.0
+No.39WT,kernel,A: transition observation,T2 or Q,1,1,100.0
+No.39WT,kernel,A: after transition,T2,935,4,0.42780748663101603
+No.39WT,kernel,A: after transition,Q,935,19,2.0320855614973263
+No.39WT,kernel,A: after transition,T2 or Q,935,23,2.4598930481283423
+No.39WT,kernel,B: alarm episodes,T2,502,4,0.796812749003984
+No.39WT,kernel,B: alarm episodes,Q,502,474,94.42231075697211
+No.39WT,kernel,B: alarm episodes,T2 or Q,502,478,95.2191235059761
+No.39WT,kernel,B: outside alarm episodes,T2,903,0,0.0
+No.39WT,kernel,B: outside alarm episodes,Q,903,15,1.6611295681063125
+No.39WT,kernel,B: outside alarm episodes,T2 or Q,903,15,1.6611295681063125
+No.39WT,linear,A: fault period (before variable 13 transition),T2,469,469,100.0
+No.39WT,linear,A: fault period (before variable 13 transition),Q,469,469,100.0
+No.39WT,linear,A: fault period (before variable 13 transition),T2 or Q,469,469,100.0
+No.39WT,linear,A: transition observation,T2,1,1,100.0
+No.39WT,linear,A: transition observation,Q,1,1,100.0
+No.39WT,linear,A: transition observation,T2 or Q,1,1,100.0
+No.39WT,linear,A: after transition,T2,935,2,0.21390374331550802
+No.39WT,linear,A: after transition,Q,935,0,0.0
+No.39WT,linear,A: after transition,T2 or Q,935,2,0.21390374331550802
+No.39WT,linear,B: alarm episodes,T2,491,472,96.13034623217924
+No.39WT,linear,B: alarm episodes,Q,491,470,95.72301425661914
+No.39WT,linear,B: alarm episodes,T2 or Q,491,472,96.13034623217924
+No.39WT,linear,B: outside alarm episodes,T2,914,0,0.0
+No.39WT,linear,B: outside alarm episodes,Q,914,0,0.0
+No.39WT,linear,B: outside alarm episodes,T2 or Q,914,0,0.0

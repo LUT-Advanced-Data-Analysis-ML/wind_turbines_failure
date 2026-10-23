@@ -1,0 +1,11 @@
+turbine,model,method,fault_start,fault_end,observations,alarm_percent
+No.14WT,kernel,A: variable 13 transition,1,357,357,100.0
+No.14WT,kernel,B: alarm episode,1,385,385,94.02597402597402
+No.14WT,kernel,B: alarm episode,474,478,5,80.0
+No.14WT,linear,A: variable 13 transition,1,357,357,100.0
+No.14WT,linear,B: alarm episode,1,379,379,94.9868073878628
+No.39WT,kernel,A: variable 13 transition,1,469,469,100.0
+No.39WT,kernel,B: alarm episode,1,497,497,95.37223340040242
+No.39WT,kernel,B: alarm episode,586,590,5,80.0
+No.39WT,linear,A: variable 13 transition,1,469,469,100.0
+No.39WT,linear,B: alarm episode,1,491,491,96.13034623217924
