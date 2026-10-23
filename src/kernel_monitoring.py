@@ -78,8 +78,8 @@ class KernelProjection:
     """Observations projected onto a kernel PCA model with n retained components."""
 
     scaled: np.ndarray
-    # Scores of each sensor's kernel piece (K x M x n, Eq. 11); they add up
-    # over the sensors to the scores.
+    # Scores of each sensor's centred kernel piece (partial scores, K x M x n);
+    # they add up over the sensors to the scores.
     partial_scores: np.ndarray
     scores: np.ndarray
     t2: np.ndarray
@@ -90,8 +90,9 @@ def fit_kernel_model(x: pd.DataFrame, family: str, width: float = 1.0) -> Kernel
     """
     Autoscale the reference X with its own statistics and fit kernel PCA.
 
-    The kernel matrix is the sum of the sensor kernels (Eq. 6), centred as
-    Kc = (I - 11'/N) K (I - 11'/N) (Eq. 8) and decomposed as Kc = U W U'.
+    The kernel matrix is the sum of the one-sensor kernels,
+    K = sum_l k_l(z_l, z_l), centred in the feature space as
+    Kc = (I - 11'/N) K (I - 11'/N) and decomposed as Kc = U W U'.
     """
     assert family in KERNEL_FAMILIES, f"Unknown kernel family: {family}"
     assert family == "linear" or width > 0
@@ -135,7 +136,7 @@ def fit_kernel_model(x: pd.DataFrame, family: str, width: float = 1.0) -> Kernel
 
 
 def _score_directions(model: KernelModel, n_components: int) -> np.ndarray:
-    """Retained eigenvectors divided by sqrt(w_a), so that y = kc u_a / sqrt(w_a) (Eq. 9)."""
+    """Retained eigenvectors divided by sqrt(w_a), so that the scores are y_a = kc u_a / sqrt(w_a)."""
     w = model.eigenvalues[:n_components] * (model.n_observations - 1)
     return model.eigenvectors[:, :n_components] / np.sqrt(w)
 
@@ -145,8 +146,9 @@ def project_kernel(model: KernelModel, x: pd.DataFrame, n_components: int) -> Ke
     Autoscale X with the model statistics and project it onto n kernel components.
 
     For each sensor l the kernel row k_l(x, Z) is centred with that sensor's
-    reference means and projected (partial scores, Eq. 11); the scores are
-    their sum. T2 = sum_a y_a^2 / lambda_a and
+    reference means and projected, giving the partial scores
+    y_a^(l) = kc_l u_a / sqrt(w_a); the scores are their sum over the
+    sensors. T2 = sum_a y_a^2 / lambda_a and
     Q = kc(x, x) - sum_a y_a^2, where kc(x, x) = k(x, x) - 2 mean_i k(x, z_i)
     + mean(K) is the squared distance of x from the reference mean in the
     feature space. The model is never refitted on the projected observations.
@@ -242,7 +244,7 @@ def kernel_limits(
 
     theoretical: the F-distribution T2 limit for new observations (as in
     Phase 1) and the scaled chi-square Q limit g chi2_h with g = var / (2 mean)
-    and h = 2 mean^2 / var of the reference Q (paper Eq. C.7).
+    and h = 2 mean^2 / var of the reference Q.
     mean_3sd: mean plus three standard deviations of the reference T2 and Q
     """
     n_components = reference_projection.scores.shape[1]
@@ -261,11 +263,11 @@ def kernel_limits(
     raise ValueError(f"Unknown limit type: {limit_type}")
 
 
-def eq12_contributions(
+def partial_score_contributions(
     model: KernelModel, projection: KernelProjection, normalise: bool = True
 ) -> np.ndarray:
     """
-    Sensor contributions to T2 from the partial scores (Eq. 12), M x K.
+    Sensor contributions to T2 from the partial scores, M x K.
 
     r_l = sum_a (y_a^(l))^2 / lambda_a, and the normalised shares
     c_l = r_l / sum_m r_m add up to one for each observation. Partial scores
