@@ -1,19 +1,22 @@
-"""Phase 7: the fewest sensors that give the same result as the full models.
+"""Phase 7: the first passing contribution-ranked sensor prefix for each model.
 
 For each model (kernel and linear) the sensors are ranked by their mean
 share of Q over the fault period (Phase 6, averaged over the two faulty
 turbines). Models are built on the top 1, top 2, ... sensors, from healthy
-No.2WT observations only, and the search stops at the first number of
-sensors that gives the same result as the full 25-sensor model:
+No.2WT observations only, and the search stops at the first prefix meeting
+these monitoring criteria relative to the full 25-sensor model:
 A: at least 99% of the fault period alarmed in both faulty turbines,
 B: after-transition alarm rate at most 2 percentage points above the full model's,
 C: healthy false-alarm rate in the blocked cross-validation at most 2%.
+This ranked-prefix search does not establish the smallest passing subset
+among all sensor combinations.
 
 Note: Kernel sets keep the Phase 4 settings. Linear sets follow the Phase 1
 recipe (autoscaling and the Kaiser rule) with one component for a single
 sensor. Both models use the F-distribution T2 limit and the scaled
-chi-square Q limit, as in Phase 5. The faulty turbines only score the sensor
-sets; no model is fitted on them.
+chi-square Q limit, as in Phase 5. Models are fitted only on healthy data.
+Faulty observations determine the Q-share ranking and assess criteria A and B,
+so subset selection is fault-specific.
 """
 
 import numpy as np
@@ -61,7 +64,7 @@ def main() -> None:
         "fault period (Phase 6, mean of both faulty turbines)"
     )
     print(
-        f"Same result as the full model: A) >= {MIN_DETECTION_PERCENT:g}% of the fault period "
+        f"Passes monitoring criteria relative to the full model: A) >= {MIN_DETECTION_PERCENT:g}% of the fault period "
         f"alarmed in both turbines; B) after-transition alarms <= full model + "
         f"{AFTER_TRANSITION_MARGIN_PERCENT:g} points; C) healthy CV false-alarm rate <= "
         f"{MAX_FALSE_ALARM_PERCENT:g}%"
@@ -147,7 +150,7 @@ def main() -> None:
             }
         )
         print(
-            f"  -> {model_name}: the same result as the full model with "
+            f"  -> {model_name}: first passing ranked prefix with "
             f"{int(selected['n_sensors'])} sensor(s): {selected['sensors']}"
         )
 

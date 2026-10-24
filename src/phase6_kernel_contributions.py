@@ -1,11 +1,11 @@
 """Phase 6: sensor contributions of the kernel and linear models.
 
-For every observation of the faulty turbines, T2 and Q are split into one
-share per sensor, for the kernel model selected in Phase 4 and the Phase 1
-linear model. T2 shares come from the partial scores (the per-sensor pieces
-of the scores); Q shares come from the split of the residual into one block
-per sensor. The shares are averaged over the fault period before the
-variable 13 transition, and the sensor rankings of the two models are compared.
+For every observation of the faulty turbines, the Phase 4 kernel model and
+Phase 1 linear model yield per-sensor T2 and Q shares. T2 uses normalised
+partial-score magnitudes, whose raw values need not sum to T2; Q has an exact,
+non-negative per-sensor residual decomposition. The shares are averaged over
+the fault period before the variable 13 transition, and the sensor rankings
+of the two models are compared.
 
 Note: Shares (each observation adds up to 100%) are used instead of raw
 contributions, so that both models are on the same scale and a few extreme
