@@ -3,12 +3,13 @@
 Every combination of kernel family, shared width and number of kernel
 components is scored by its false-alarm rate (FAR) on held-out healthy
 observations, with the theoretical 99% limits (F-distribution T2 limit and
-scaled chi-square Q limit). Among the settings whose FAR is close to the 1%
-promised by these limits, the one with the fewest components and then the
-narrowest width is selected. The faulty turbines are not used.
+scaled chi-square Q limit). Settings are ranked by how close their combined
+T2-or-Q FAR is to a 1% design target; two marginal 99% limits do not guarantee
+a 1% combined rate. Among near-ties, the fewest components and then the
+narrowest width are preferred. The faulty turbines are not used.
 
-Note: Only the selected settings are saved; Phase 5 refits the final kernel
-model from them.
+Note: Phase 4 saves the CV results and summary as well as the selected settings;
+Phase 5 refits the final kernel model from the selected settings.
 """
 
 import matplotlib
@@ -43,15 +44,16 @@ GRID_FAMILIES = [family for family in KERNEL_FAMILIES if family != "linear"]
 WIDTHS = [0.25, 0.5, 1, 2, 3, 5, 8, 12, 20, 35, 50]
 N_COMPONENTS_LIST = [4, 6, 8, 10]
 LIMIT_TYPE = "theoretical"
-# The 99% limits promise about 1% false alarms. Settings whose distance from
-# that target is within the tolerance of the best distance are near-ties;
-# 0.25 percentage points is the binomial standard error of a 1% rate over
-# the 1570 validated observations.
+# Use 1% as a heuristic target for the combined alarm rate. Settings whose
+# distance from that target is within 0.25 percentage points of the best
+# distance are near-ties. This tolerance is roughly the binomial standard
+# error for 1570 independent observations at 1%, but temporal dependence
+# means it is not a CV uncertainty bound.
 TARGET_FAR_PERCENT = 100 * (1 - CONFIDENCE)
 TIE_TOLERANCE_PERCENT = 0.25
 # Sort order of the near-ties (the first row is selected): fewest
-# components, narrowest width, closest to the target, then the family from
-# the smoothest to the roughest kernel.
+# components, narrowest width, closest to the target, then the fixed family
+# order in FAMILY_ORDER.
 TIE_BREAK_COLUMNS = ["n_components_min", "width", "distance_from_target_percent", "family_rank"]
 FAMILY_ORDER = ["gaussian", "matern5/2", "cauchy", "matern3/2", "matern1/2"]
 # Axis ticks of the tuning map (the FAR axis is linear up to 1% and logarithmic above).
@@ -99,7 +101,7 @@ def main() -> None:
         f"\nSelection rule: settings whose mean FAR is within {TIE_TOLERANCE_PERCENT:g} "
         f"percentage points of the best distance from {TARGET_FAR_PERCENT:g}% are near-ties; "
         "among them the fewest components, then the narrowest width, then the FAR "
-        "closest to the target, then the smoothest family"
+        "closest to the target, then the fixed family order in FAMILY_ORDER"
     )
     ties = summary[summary["near_tie"]].sort_values(TIE_BREAK_COLUMNS)
     print(f"\nNear-ties ({len(ties)} settings), in tie-break order:")
@@ -162,7 +164,7 @@ def select_setting(summary: pd.DataFrame) -> pd.DataFrame:
     Distance = |mean FAR - target|. Settings within the tie tolerance of the
     smallest distance are near-ties; the selected one has the fewest
     components, then the narrowest width, then the smallest distance, then
-    the smoothest family.
+    the fixed family order in FAMILY_ORDER.
     """
     table = summary.copy()
     table["distance_from_target_percent"] = (table["far_percent_mean"] - TARGET_FAR_PERCENT).abs()
