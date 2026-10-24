@@ -331,10 +331,10 @@ def create_kernel_score_plots(
     """
     KPC1-KPC2 scores of each faulty turbine over the healthy scores.
 
-    Faulty observations are coloured by observation order. Every one-sensor
-    kernel is bounded, so faulty scores stay near the healthy score range and
-    no zoomed view is needed. Kernel components have no loading vector per
-    sensor, so no arrows are drawn.
+    Faulty observations are coloured by observation order. Bounded one-sensor
+    kernels bound score magnitudes, but faulty scores can extend beyond the
+    observed healthy range. Healthy and faulty scores use common axes. Kernel
+    components have no per-sensor loading arrows.
     """
     explained = 100 * model.eigenvalues / model.eigenvalues.sum()
     healthy = projections[HEALTHY_TURBINE].scores
