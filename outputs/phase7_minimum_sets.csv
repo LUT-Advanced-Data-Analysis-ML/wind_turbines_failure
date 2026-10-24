@@ -1,0 +1,3 @@
+model,ranking,minimum_sensors,sensors,n_components,cv_false_alarm_percent,fault_detection_percent_No.14WT,fault_detection_percent_No.39WT,after_transition_percent_No.14WT,after_transition_percent_No.39WT
+kernel,20 22 21 13 9 11 16 17 3 7 4 8 6 25 27 26 24 10 5 18 23 19 14 1 2,3,20 22 21,4,1.4522522522522523,100.0,100.0,0.0,0.21390374331550802
+linear,9 14 13 22 16 17 23 18 25 5 10 11 20 27 24 26 1 4 19 3 2 7 21 8 6,1,9,1,0.0,100.0,100.0,0.0,0.0

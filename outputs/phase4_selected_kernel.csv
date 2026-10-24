@@ -1,0 +1,2 @@
+family,width,n_components,limit_type,t2_limit,q_limit,n_observations,confidence
+gaussian,5.0,4,theoretical,13.358637424683016,0.7034331054303624,1570,0.99
